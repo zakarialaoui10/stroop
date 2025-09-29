@@ -1,0 +1,26 @@
+{
+  "name": "stroop",
+  "version": "0.0.0",
+  "description": "",
+  "homepage": "https://github.com/zakarialaoui10/stroop#readme",
+  "bugs": {
+    "url": "https://github.com/zakarialaoui10/stroop/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zakarialaoui10/stroop.git"
+  },
+  "license": "MIT",
+  "author": "zakaria elalaoui",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "exports":{
+    "./*" : "./src/*/index.js"
+  },
+  "dependencies": {
+    "ziko": "^0.46.1"
+  }
+}
