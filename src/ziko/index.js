@@ -1,1 +1,1 @@
-export * from './components/index.ks'
+export * from './ui/index.js'
