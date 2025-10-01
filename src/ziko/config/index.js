@@ -1,5 +1,5 @@
 export class StroopConfig {
-  constructor(trials = 40, congruentPct = 50, iti = 800, timeout = 4000, track = "ink") {
+  constructor(trials = 40, congruentPct = 50, iti = 800, timeout = 1000, track = "ink") {
     this.trials = trials;
     this.congruentPct = congruentPct;
     this.iti = iti;
