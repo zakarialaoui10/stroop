@@ -1,14 +1,14 @@
 {
-  "name": "stroop-test",
+  "name": "stroop-effect",
   "version": "0.0.0",
   "description": "",
-  "homepage": "https://github.com/zakarialaoui10/stroop-test#readme",
+  "homepage": "https://github.com/zakarialaoui10/stroop-effect#readme",
   "bugs": {
-    "url": "https://github.com/zakarialaoui10/stroop-test/issues"
+    "url": "https://github.com/zakarialaoui10/stroop-effect/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zakarialaoui10/stroop-test.git"
+    "url": "git+https://github.com/zakarialaoui10/stroop-effect.git"
   },
   "license": "MIT",
   "author": "zakaria elalaoui",
