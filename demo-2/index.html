@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Stroop Test</title>
+<style>
+  :root{
+    --bg: #0f1724;
+    --card: #0b1220;
+    --accent: #38bdf8;
+    --muted: #94a3b8;
+    --text: #e6eef8;
+    --success: #10b981;
+    --danger: #ef4444;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+  html,body{height:100vh;margin:0;background:linear-gradient(180deg,#071025 0%, #0f1724 100%);color:var(--text);overflow:auto}
+  .wrap{min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:24px;box-sizing:border-box}
+  .card{width:920px;max-width:100%;background:linear-gradient(180deg,rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:20px;box-shadow:0 8px 30px rgba(2,6,23,0.6)}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+  h1{font-size:20px;margin:0}
+  p.lead{margin:6px 0 14px;color:var(--muted);font-size:13px}
+  .controls{display:flex;gap:8px;flex-wrap:wrap}
+  .btn{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text);padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600}
+  .btn.primary{background:var(--accent);color:#04202a;border:none}
+  .btn.ghost{background:transparent}
+  .grid{display:grid;grid-template-columns: 1fr 360px;gap:18px}
+  @media (max-width:880px){ .grid{grid-template-columns:1fr} }
+  .panel{background:rgba(255,255,255,0.01);padding:14px;border-radius:10px}
+  .stimulus{height:220px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);font-size:48px;font-weight:800;user-select:none}
+  .small{font-size:13px;color:var(--muted)}
+  .config-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+  label{font-size:13px;color:var(--muted);min-width:120px}
+  input[type="number"]{width:88px;padding:6px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--text)}
+  select{padding:6px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--text)}
+  .table-wrapper{margin-top:10px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:8px;border-bottom:1px dashed rgba(255,255,255,0.03);text-align:left}
+  th{color:var(--muted);font-weight:600}
+  .pagination{display:flex;align-items:center;justify-content:space-between;margin-top:12px;gap:8px}
+  .pagination-info{font-size:12px;color:var(--muted)}
+  .pagination-controls{display:flex;gap:6px}
+  .page-btn{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text);padding:6px 10px;border-radius:6px;cursor:pointer;font-size:12px;min-width:32px}
+  .page-btn:disabled{opacity:0.3;cursor:not-allowed}
+  .page-btn.active{background:var(--accent);color:#04202a;border:none}
+  .keymap{display:flex;gap:8px;margin-top:8px}
+  .key{padding:6px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.04);display:inline-block}
+  .results-summary{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}
+  .stat{padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.02);font-weight:700}
+  footer{margin-top:12px;color:var(--muted);font-size:12px}
+  .legend{display:flex;gap:8px;align-items:center;margin-top:8px}
+  .dot{width:14px;height:14px;border-radius:4px;display:inline-block;margin-right:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card" role="main" aria-labelledby="title">
+    <header>
+      <div>
+        <h1 id="title">Stroop Test</h1>
+        <p class="lead">Measure reaction time and accuracy for congruent vs incongruent color-word stimuli. Use keyboard keys or click the buttons.</p>
+      </div>
+      <div class="controls">
+        <button id="startBtn" class="btn primary">Start Test</button>
+        <button id="practiceBtn" class="btn">Practice</button>
+        <button id="exportBtn" class="btn">Export CSV</button>
+        <button id="resetBtn" class="btn ghost">Reset Data</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="panel">
+        <div class="stimulus" id="stimulus" aria-live="polite">Press Start</div>
+
+        <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;align-items:center">
+          <div>
+            <button class="btn" data-color="red">Red</button>
+            <button class="btn" data-color="green">Green</button>
+            <button class="btn" data-color="blue">Blue</button>
+            <button class="btn" data-color="yellow">Yellow</button>
+          </div>
+          <div style="margin-left:auto" class="small">Keys: <span class="key">R</span> <span class="key">G</span> <span class="key">B</span> <span class="key">Y</span></div>
+        </div>
+
+        <div class="legend">
+          <div><span class="dot" style="background:var(--success)"></span> Correct</div>
+          <div><span class="dot" style="background:var(--danger)"></span> Wrong</div>
+        </div>
+
+        <div class="results-summary" id="summary">
+          <div class="stat" id="totalTrials">Trials: 0</div>
+          <div class="stat" id="avgRT">Avg RT: — ms</div>
+          <div class="stat" id="acc">Accuracy: — %</div>
+        </div>
+
+        <footer>Tip: Try to respond as quickly and accurately as possible.</footer>
+      </div>
+
+      <aside class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong>Configuration</strong>
+          <span class="small">Keyboard: R G B Y</span>
+        </div>
+
+        <div style="margin-top:12px">
+          <div class="config-row">
+            <label for="trials">Trials</label>
+            <input id="trials" type="number" value="40" min="4" step="2" />
+          </div>
+          <div class="config-row">
+            <label for="congruentPct">Congruent %</label>
+            <input id="congruentPct" type="number" value="50" min="0" max="100" />
+          </div>
+          <div class="config-row">
+            <label for="iti">Inter-trial (ms)</label>
+            <input id="iti" type="number" value="800" min="200" step="50" />
+          </div>
+          <div class="config-row">
+            <label for="timeout">Response timeout (ms)</label>
+            <input id="timeout" type="number" value="4000" min="500" step="100" />
+          </div>
+
+          <div style="margin-top:10px">
+            <label class="small">Color set</label>
+            <select id="colorset">
+              <option value="default">Red/Green/Blue/Yellow</option>
+              <option value="warm">Red/Orange/Yellow/Brown</option>
+            </select>
+          </div>
+
+          <hr style="margin:12px 0;border:none;border-top:1px dashed rgba(255,255,255,0.03)">
+
+          <strong>Results</strong>
+          <div class="table-wrapper">
+            <table id="resultsTable" aria-describedby="summary">
+              <thead>
+                <tr><th>#</th><th>Word</th><th>Ink</th><th>Type</th><th>RT (ms)</th><th>Correct</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="pagination" id="pagination">
+            <div class="pagination-info" id="paginationInfo">Showing 0-0 of 0</div>
+            <div class="pagination-controls">
+              <button class="page-btn" id="firstPageBtn">«</button>
+              <button class="page-btn" id="prevPageBtn">‹</button>
+              <span class="pagination-info" id="pageNumbers"></span>
+              <button class="page-btn" id="nextPageBtn">›</button>
+              <button class="page-btn" id="lastPageBtn">»</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<script>
+/**
+ * Stroop Test - Class-Based Architecture
+ */
+
+// ============ TablePagination Class ============
+class TablePagination {
+  constructor(itemsPerPage = 10) {
+    this.itemsPerPage = itemsPerPage;
+    this.currentPage = 1;
+    this.totalItems = 0;
+    this.items = [];
+    
+    this.elements = {
+      tbody: document.querySelector('#resultsTable tbody'),
+      paginationInfo: document.getElementById('paginationInfo'),
+      pageNumbers: document.getElementById('pageNumbers'),
+      firstPageBtn: document.getElementById('firstPageBtn'),
+      prevPageBtn: document.getElementById('prevPageBtn'),
+      nextPageBtn: document.getElementById('nextPageBtn'),
+      lastPageBtn: document.getElementById('lastPageBtn')
+    };
+    
+    this.initializeEventListeners();
+  }
+  
+  initializeEventListeners() {
+    this.elements.firstPageBtn.addEventListener('click', () => this.goToPage(1));
+    this.elements.prevPageBtn.addEventListener('click', () => this.goToPage(this.currentPage - 1));
+    this.elements.nextPageBtn.addEventListener('click', () => this.goToPage(this.currentPage + 1));
+    this.elements.lastPageBtn.addEventListener('click', () => this.goToPage(this.getTotalPages()));
+  }
+  
+  setItems(items) {
+    this.items = items;
+    this.totalItems = items.length;
+    this.goToPage(this.getTotalPages()); // Go to last page to show latest results
+  }
+  
+  addItem(item) {
+    this.items.push(item);
+    this.totalItems = this.items.length;
+    this.goToPage(this.getTotalPages()); // Auto go to last page
+  }
+  
+  clear() {
+    this.items = [];
+    this.totalItems = 0;
+    this.currentPage = 1;
+    this.render();
+  }
+  
+  getTotalPages() {
+    return Math.max(1, Math.ceil(this.totalItems / this.itemsPerPage));
+  }
+  
+  goToPage(page) {
+    const totalPages = this.getTotalPages();
+    this.currentPage = Math.max(1, Math.min(page, totalPages));
+    this.render();
+  }
+  
+  getCurrentPageItems() {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    return this.items.slice(start, end);
+  }
+  
+  render() {
+    this.elements.tbody.innerHTML = '';
+    const pageItems = this.getCurrentPageItems();
+    
+    pageItems.forEach(item => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = item;
+      this.elements.tbody.appendChild(tr);
+    });
+    
+    this.updatePaginationControls();
+  }
+  
+  updatePaginationControls() {
+    const totalPages = this.getTotalPages();
+    const start = this.totalItems === 0 ? 0 : (this.currentPage - 1) * this.itemsPerPage + 1;
+    const end = Math.min(this.currentPage * this.itemsPerPage, this.totalItems);
+    
+    this.elements.paginationInfo.textContent = `Showing ${start}-${end} of ${this.totalItems}`;
+    this.elements.pageNumbers.textContent = `Page ${this.currentPage} of ${totalPages}`;
+    
+    this.elements.firstPageBtn.disabled = this.currentPage === 1;
+    this.elements.prevPageBtn.disabled = this.currentPage === 1;
+    this.elements.nextPageBtn.disabled = this.currentPage === totalPages;
+    this.elements.lastPageBtn.disabled = this.currentPage === totalPages;
+  }
+}
+
+// ============ ColorSet Class ============
+class ColorSet {
+  constructor(name, colors) {
+    this.name = name;
+    this.colors = colors;
+  }
+
+  getColorByKey(key) {
+    return this.colors.find(c => c.key === key.toLowerCase());
+  }
+
+  getColorByName(name) {
+    return this.colors.find(c => c.name === name);
+  }
+
+  getAllColors() {
+    return [...this.colors];
+  }
+
+  getRandomColor() {
+    return this.colors[Math.floor(Math.random() * this.colors.length)];
+  }
+}
+
+// ============ ColorSetManager Class ============
+class ColorSetManager {
+  constructor() {
+    this.colorSets = {
+      default: new ColorSet('default', [
+        {name: 'red', display: 'RED', css: '#ef4444', key: 'r'},
+        {name: 'green', display: 'GREEN', css: '#10b981', key: 'g'},
+        {name: 'blue', display: 'BLUE', css: '#3b82f6', key: 'b'},
+        {name: 'yellow', display: 'YELLOW', css: '#f59e0b', key: 'y'}
+      ]),
+      warm: new ColorSet('warm', [
+        {name: 'red', display: 'RED', css: '#ef4444', key: 'r'},
+        {name: 'orange', display: 'ORANGE', css: '#fb923c', key: 'g'},
+        {name: 'yellow', display: 'YELLOW', css: '#f59e0b', key: 'b'},
+        {name: 'brown', display: 'BROWN', css: '#a0522d', key: 'y'}
+      ])
+    };
+    this.currentSet = this.colorSets.default;
+  }
+
+  setColorSet(name) {
+    if (this.colorSets[name]) {
+      this.currentSet = this.colorSets[name];
+      return true;
+    }
+    return false;
+  }
+
+  getCurrentSet() {
+    return this.currentSet;
+  }
+}
+
+// ============ Trial Class ============
+class Trial {
+  constructor(word, ink, congruent) {
+    this.word = word;
+    this.ink = ink;
+    this.congruent = congruent;
+  }
+
+  isCongruent() {
+    return this.congruent;
+  }
+}
+
+// ============ TrialResult Class ============
+class TrialResult {
+  constructor(index, trial, rt, correct, timedOut, selected) {
+    this.index = index;
+    this.word = trial.word;
+    this.ink = trial.ink;
+    this.type = trial.congruent ? 'congruent' : 'incongruent';
+    this.rt = Math.round(rt);
+    this.correct = correct;
+    this.timedOut = timedOut;
+    this.selected = selected;
+  }
+
+  isValid() {
+    return !this.timedOut;
+  }
+}
+
+// ============ TrialGenerator Class ============
+class TrialGenerator {
+  constructor(colorSetManager) {
+    this.colorSetManager = colorSetManager;
+  }
+
+  generateTrials(count, congruentPercent) {
+    const trials = [];
+    const congruentCount = Math.round(count * congruentPercent / 100);
+    const incongruentCount = count - congruentCount;
+    const colors = this.colorSetManager.getCurrentSet().getAllColors();
+
+    // Generate congruent trials
+    for (let i = 0; i < congruentCount; i++) {
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      trials.push(new Trial(color.display, color.name, true));
+    }
+
+    // Generate incongruent trials
+    for (let i = 0; i < incongruentCount; i++) {
+      const wordIdx = Math.floor(Math.random() * colors.length);
+      let inkIdx = Math.floor(Math.random() * colors.length);
+      if (inkIdx === wordIdx) inkIdx = (inkIdx + 1) % colors.length;
+      trials.push(new Trial(colors[wordIdx].display, colors[inkIdx].name, false));
+    }
+
+    return this.shuffle(trials);
+  }
+
+  shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+}
+
+// ============ StroopConfig Class ============
+class StroopConfig {
+  constructor(trials = 40, congruentPct = 50, iti = 800, timeout = 4000) {
+    this.trials = trials;
+    this.congruentPct = congruentPct;
+    this.iti = iti;
+    this.timeout = timeout;
+  }
+
+  validate() {
+    this.trials = Math.max(4, this.trials);
+    this.congruentPct = Math.min(100, Math.max(0, this.congruentPct));
+    this.iti = Math.max(100, this.iti);
+    this.timeout = Math.max(300, this.timeout);
+  }
+}
+
+// ============ StroopUI Class ============
+class StroopUI {
+  constructor() {
+    this.elements = {
+      stimulus: document.getElementById('stimulus'),
+      startBtn: document.getElementById('startBtn'),
+      practiceBtn: document.getElementById('practiceBtn'),
+      exportBtn: document.getElementById('exportBtn'),
+      resetBtn: document.getElementById('resetBtn'),
+      trialsInput: document.getElementById('trials'),
+      congruentPctInput: document.getElementById('congruentPct'),
+      itiInput: document.getElementById('iti'),
+      timeoutInput: document.getElementById('timeout'),
+      totalTrialsEl: document.getElementById('totalTrials'),
+      avgRTEl: document.getElementById('avgRT'),
+      accEl: document.getElementById('acc'),
+      colorsetSelect: document.getElementById('colorset')
+    };
+    
+    this.pagination = new TablePagination(10);
+  }
+
+  showStimulus(trial, colorSet) {
+    this.elements.stimulus.textContent = trial.word;
+    const colorObj = colorSet.getColorByName(trial.ink) || colorSet.getAllColors()[0];
+    this.elements.stimulus.style.color = colorObj.css;
+    this.elements.stimulus.style.opacity = '1';
+  }
+
+  clearStimulus() {
+    this.elements.stimulus.textContent = '';
+  }
+
+  blinkBlank(ms = 250) {
+    return new Promise(resolve => {
+      this.elements.stimulus.style.opacity = '0.15';
+      setTimeout(() => {
+        this.clearStimulus();
+        this.elements.stimulus.style.opacity = '1';
+        resolve();
+      }, ms);
+    });
+  }
+
+  appendResultRow(result) {
+    const rowHtml = `
+      <td>${result.index}</td>
+      <td>${this.escapeHtml(result.word)}</td>
+      <td>${this.escapeHtml(result.ink)}</td>
+      <td>${this.escapeHtml(result.type)}</td>
+      <td>${result.timedOut ? 'timeout' : result.rt}</td>
+      <td>${result.correct ? '✅' : '❌'}</td>
+    `;
+    this.pagination.addItem(rowHtml);
+  }
+
+  clearResults() {
+    this.pagination.clear();
+  }
+
+  updateSummary(results, totalTrials) {
+    const n = results.length;
+    this.elements.totalTrialsEl.textContent = `Trials: ${n} / ${totalTrials}`;
+    
+    if (n === 0) {
+      this.elements.avgRTEl.textContent = `Avg RT: — ms`;
+      this.elements.accEl.textContent = `Accuracy: — %`;
+      return;
+    }
+
+    const valid = results.filter(r => r.isValid());
+    const avgRT = valid.length ? Math.round(valid.reduce((s, r) => s + r.rt, 0) / valid.length) : 0;
+    const acc = Math.round((results.filter(r => r.correct).length / n) * 100);
+    
+    this.elements.avgRTEl.textContent = `Avg RT: ${avgRT} ms`;
+    this.elements.accEl.textContent = `Accuracy: ${acc} %`;
+  }
+
+  getConfig() {
+    return new StroopConfig(
+      parseInt(this.elements.trialsInput.value, 10),
+      parseInt(this.elements.congruentPctInput.value, 10),
+      parseInt(this.elements.itiInput.value, 10),
+      parseInt(this.elements.timeoutInput.value, 10)
+    );
+  }
+
+  updateColorButtons(colorSet) {
+    const colorButtons = document.querySelectorAll('button[data-color]');
+    const colors = colorSet.getAllColors();
+    colorButtons.forEach((btn, i) => {
+      const c = colors[i] || colors[0];
+      btn.dataset.color = c.name;
+      btn.textContent = c.display;
+    });
+  }
+
+  setStartButtonEnabled(enabled) {
+    this.elements.startBtn.disabled = !enabled;
+    if (enabled) {
+      this.elements.startBtn.classList.add('primary');
+    } else {
+      this.elements.startBtn.classList.remove('primary');
+    }
+  }
+
+  escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+}
+
+// ============ DataExporter Class ============
+class DataExporter {
+  exportToCSV(results) {
+    if (results.length === 0) {
+      alert('No results to export.');
+      return;
+    }
+
+    const headers = ['index', 'word', 'ink', 'type', 'rt', 'correct', 'timedOut', 'selected'];
+    const rows = results.map(r => headers.map(h => {
+      let v = r[h];
+      if (typeof v === 'boolean') v = v ? 1 : 0;
+      if (v === null || v === undefined) v = '';
+      return `"${String(v).replace(/"/g, '""')}"`;
+    }).join(','));
+
+    const csv = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const ts = new Date().toISOString().replace(/[:.]/g, '-');
+    a.download = `stroop-results-${ts}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+}
+
+// ============ StroopTest Class (Main Controller) ============
+class StroopTest {
+  constructor() {
+    this.colorSetManager = new ColorSetManager();
+    this.trialGenerator = new TrialGenerator(this.colorSetManager);
+    this.ui = new StroopUI();
+    this.exporter = new DataExporter();
+    
+    this.state = {
+      running: false,
+      practice: false,
+      trialIndex: 0,
+      trials: [],
+      results: [],
+      startTime: null,
+      awaiting: false,
+      timeoutId: null,
+      config: null
+    };
+
+    this.initializeEventListeners();
+    this.initializeUI();
+  }
+
+  initializeEventListeners() {
+    this.ui.elements.startBtn.addEventListener('click', () => this.start());
+    this.ui.elements.practiceBtn.addEventListener('click', () => this.startPractice());
+    this.ui.elements.exportBtn.addEventListener('click', () => this.export());
+    this.ui.elements.resetBtn.addEventListener('click', () => this.reset());
+    this.ui.elements.colorsetSelect.addEventListener('change', (e) => this.changeColorSet(e.target.value));
+    
+    document.addEventListener('keydown', (e) => this.handleKeyPress(e));
+    document.querySelectorAll('button[data-color]').forEach(btn => {
+      btn.addEventListener('click', (e) => this.handleColorButtonClick(e));
+    });
+
+    setInterval(() => this.updateButtonState(), 200);
+  }
+
+  initializeUI() {
+    this.ui.updateColorButtons(this.colorSetManager.getCurrentSet());
+  }
+
+  start() {
+    this.startRun(false);
+  }
+
+  startPractice() {
+    this.startRun(true);
+  }
+
+  startRun(isPractice = false) {
+    if (this.state.running) return;
+
+    this.state.practice = isPractice;
+    this.state.running = true;
+    this.state.trialIndex = 0;
+    this.state.results = [];
+    this.ui.clearResults();
+
+    const config = this.ui.getConfig();
+    config.validate();
+    this.state.config = config;
+
+    this.state.trials = this.trialGenerator.generateTrials(config.trials, config.congruentPct);
+    this.ui.updateSummary(this.state.results, this.state.trials.length);
+
+    setTimeout(() => this.runNextTrial(), 300);
+  }
+
+  stop() {
+    this.state.running = false;
+    this.state.awaiting = false;
+    this.ui.clearStimulus();
+    this.clearTimeout();
+    this.ui.updateSummary(this.state.results, this.state.trials.length);
+  }
+
+  reset() {
+    if (!confirm('Reset recorded results?')) return;
+    this.state.results = [];
+    this.ui.clearResults();
+    this.ui.updateSummary(this.state.results, 0);
+  }
+
+  export() {
+    this.exporter.exportToCSV(this.state.results);
+  }
+
+  changeColorSet(setName) {
+    this.colorSetManager.setColorSet(setName);
+    this.ui.updateColorButtons(this.colorSetManager.getCurrentSet());
+  }
+
+  runNextTrial() {
+    if (!this.state.running) return;
+    
+    if (this.state.trialIndex >= this.state.trials.length) {
+      this.stop();
+      return;
+    }
+
+    const trial = this.state.trials[this.state.trialIndex];
+    this.state.awaiting = true;
+    
+    this.ui.showStimulus(trial, this.colorSetManager.getCurrentSet());
+    this.state.startTime = performance.now();
+
+    this.state.timeoutId = setTimeout(() => {
+      this.recordResponse({
+        rt: this.state.config.timeout,
+        correct: false,
+        timedOut: true,
+        selected: null
+      });
+    }, this.state.config.timeout);
+  }
+
+  recordResponse({rt, correct, timedOut = false, selected = null}) {
+    if (!this.state.running || !this.state.awaiting) return;
+
+    this.clearTimeout();
+    this.state.awaiting = false;
+
+    const trial = this.state.trials[this.state.trialIndex];
+    const result = new TrialResult(
+      this.state.trialIndex + 1,
+      trial,
+      rt,
+      correct,
+      timedOut,
+      selected
+    );
+
+    this.state.results.push(result);
+    this.ui.appendResultRow(result);
+    this.ui.updateSummary(this.state.results, this.state.trials.length);
+
+    this.state.trialIndex++;
+
+    this.ui.blinkBlank(200).then(() => {
+      setTimeout(() => this.runNextTrial(), this.state.config.iti);
+    });
+  }
+
+  handleKeyPress(e) {
+    if (!this.state.running || !this.state.awaiting) return;
+
+    const key = e.key.toLowerCase();
+    const color = this.colorSetManager.getCurrentSet().getColorByKey(key);
+    if (!color) return;
+
+    const rt = performance.now() - this.state.startTime;
+    const trial = this.state.trials[this.state.trialIndex];
+    const correct = color.name === trial.ink;
+
+    this.recordResponse({rt, correct, timedOut: false, selected: color.name});
+  }
+
+  handleColorButtonClick(e) {
+    if (!this.state.running || !this.state.awaiting) return;
+
+    const colorName = e.target.closest('button')?.dataset?.color;
+    if (!colorName) return;
+
+    const rt = performance.now() - this.state.startTime;
+    const trial = this.state.trials[this.state.trialIndex];
+    const correct = colorName === trial.ink;
+
+    this.recordResponse({rt, correct, timedOut: false, selected: colorName});
+  }
+
+  clearTimeout() {
+    if (this.state.timeoutId) {
+      clearTimeout(this.state.timeoutId);
+      this.state.timeoutId = null;
+    }
+  }
+
+  updateButtonState() {
+    this.ui.setStartButtonEnabled(!this.state.running);
+  }
+
+  getResults() {
+    return [...this.state.results];
+  }
+
+  getConfig() {
+    return {...this.state.config};
+  }
+
+  isRunning() {
+    return this.state.running;
+  }
+}
+
+// ============ Initialize Application ============
+const stroopTest = new StroopTest();
+
+// Make it globally accessible for easy debugging/customization
+window.stroopTest = stroopTest;
+</script>
+</body>
+</html>
