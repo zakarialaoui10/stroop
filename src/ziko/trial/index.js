@@ -1,4 +1,3 @@
-// ============ Trial ============
 class Trial {
   constructor(word, ink, congruent) {
     this.word = word;
@@ -7,7 +6,6 @@ class Trial {
   }
 }
 
-// ============ TrialResult ============
 class TrialResult {
   constructor(index, trial, rt, correct, timedOut, selected, track) {
     this.index = index;
@@ -23,25 +21,24 @@ class TrialResult {
   isValid() { return !this.timedOut; }
 }
 
-// ============ TrialGenerator ============
 class TrialGenerator {
-  constructor(colorSetManager) {
-    this.colorSetManager = colorSetManager;
+  constructor(colors) {
+    // this.colorSetManager = colorSetManager;
+    this.colors = colors
   }
 
   generateTrials(count, congruentPercent) {
     const trials = [];
     const congruentCount = Math.round(count * congruentPercent / 100);
     const incongruentCount = count - congruentCount;
-    const colors = this.colorSetManager.getCurrentSet().getAllColors();
+    // const colors = this.colorSetManager.getCurrentSet().getAllColors();
+    const colors = this.colors
 
-    // Congruent
     for (let i = 0; i < congruentCount; i++) {
       const c = colors[Math.floor(Math.random() * colors.length)];
       trials.push(new Trial(c.display, c.name, true));
     }
 
-    // Incongruent
     for (let i = 0; i < incongruentCount; i++) {
       let w = Math.floor(Math.random() * colors.length);
       let ink = Math.floor(Math.random() * colors.length);

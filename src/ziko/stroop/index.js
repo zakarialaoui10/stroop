@@ -8,7 +8,16 @@ const { div } = tags;
 class UIStroop extends UIElement {
   constructor({ trials = 20, congruentPct = 50, iti = 80, timeout = 3000, track = 'ink'} = {}) {
     super({ element: "div", name: "stroop" });
-    this.setAttr({ class: "wrap" });
+    // this.setAttr({ class: "wrap" });
+
+    this.colors = [
+        { name: "red", display: "RED", css: "#ef4444", key: "r" },
+        { name: "green", display: "GREEN", css: "#10b981", key: "g" },
+        { name: "blue", display: "BLUE", css: "#3b82f6", key: "b" },
+        { name: "yellow", display: "YELLOW", css: "#f59e0b", key: "y" },
+      ]
+    this.colorSetManager = new ColorSetManager();
+    this.trialGenerator = new TrialGenerator(this.colors);
 
     this.stimulus = div("Press Start").setAttr({
       class: "stimulus",
@@ -25,6 +34,8 @@ class UIStroop extends UIElement {
       this.accuracy,
     ).setAttr({ class: "results-summary" });
 
+    this.picker = div()
+
     this.append(
       div(this.stimulus, this.result_sumary).setAttr({
         class: "card",
@@ -32,8 +43,6 @@ class UIStroop extends UIElement {
         "aria-labelledby": "title",
       }),
     );
-    this.colorSetManager = new ColorSetManager();
-    this.trialGenerator = new TrialGenerator(this.colorSetManager);
     this.state = {
       running: false,
       trialIndex: 0,
@@ -83,6 +92,9 @@ class UIStroop extends UIElement {
     this.state.awaiting = true;
 
     this.#updateStimulus(trial, this.colorSetManager.getCurrentSet());
+    // console.log(
+    //  this.colorSetManager.getCurrentSet() 
+    // )
     this.state.startTime = performance.now();
 
     this.state.timeoutId = setTimeout(() => {

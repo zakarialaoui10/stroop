@@ -1,7 +1,12 @@
 {
   "name": "stroop-effect",
   "version": "0.0.0",
-  "description": "",
+  "description": "A tool to measure cognitive control and processing speed using the Stroop Effect",
+  "keywords": [
+    "stroop-effect",
+    "psychology",
+    "cognitive-test"
+  ],
   "homepage": "https://github.com/zakarialaoui10/stroop-effect#readme",
   "bugs": {
     "url": "https://github.com/zakarialaoui10/stroop-effect/issues"

@@ -30,13 +30,13 @@ class ColorSetManager {
     this.currentSet = this.colorSets.default;
   }
 
-  setColorSet(name) {
-    if (this.colorSets[name]) {
-      this.currentSet = this.colorSets[name];
-      return true;
-    }
-    return false;
-  }
+  // setColorSet(name) {
+  //   if (this.colorSets[name]) {
+  //     this.currentSet = this.colorSets[name];
+  //     return true;
+  //   }
+  //   return false;
+  // }
 
   getCurrentSet() {
     return this.currentSet;

@@ -23,15 +23,16 @@ body {
   color: var(--text);
   overflow: auto;
 }
-.wrap {
+/* .wrap {
+  border: 2px white solid;
   min-height: 100vh;
   display: flex;
   align-items: flex-start;
   justify-content: center;
   padding: 24px;
   box-sizing: border-box;
-}
-.card {
+} */
+/* .card {
   width: 920px;
   max-width: 100%;
   background: linear-gradient(
@@ -42,7 +43,7 @@ body {
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
-}
+} */
 h1 {
   font-size: 20px;
   margin: 0;
@@ -99,58 +100,7 @@ input[type="number"] {
   background: transparent;
   color: var(--text);
 }
-.table-wrapper {
-  margin-top: 10px;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-th,
-td {
-  padding: 8px;
-  border-bottom: 1px dashed rgba(255, 255, 255, 0.03);
-  text-align: left;
-}
-th {
-  color: var(--muted);
-  font-weight: 600;
-}
-.pagination {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 12px;
-  gap: 8px;
-}
-.pagination-info {
-  font-size: 12px;
-  color: var(--muted);
-}
-.pagination-controls {
-  display: flex;
-  gap: 6px;
-}
-.page-btn {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  color: var(--text);
-  padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-  min-width: 32px;
-}
-.page-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-.page-btn.active {
-  background: var(--accent);
-  color: #04202a;
-  border: none;
-}
+
 .keymap {
   display: flex;
   gap: 8px;
