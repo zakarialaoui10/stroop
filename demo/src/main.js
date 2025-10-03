@@ -1,5 +1,5 @@
-import { View } from "ziko/ui/index.js";
-import { Stroop, ResultsStream } from 'stroop-test/ziko'
+// import { View } from "ziko/ui/index.js";
+import { Stroop, ResultsStream } from 'stroop-effect/ziko'
 
 globalThis.test = Stroop().start()
-ResultsStream()
+// ResultsStream()

@@ -12,6 +12,7 @@
     "vite": "^7.1.7"
   },
   "dependencies": {
+    "stroop-effect": "^0.0.1",
     "ziko": "^0.46.1"
   }
 }
