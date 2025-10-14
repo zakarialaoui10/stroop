@@ -43,4 +43,11 @@
 |`type`|`string`|`"congruent"` or `"incongruent"`|
 |`rt`|`number`|Reaction time in ms (if not timed out)|
 |`correct`|`boolean`|Whether the response was correct|
-|`timedOut`|`boolean`|`true` if user did not respond in time|
+|`timedOut`|`boolean`|`true` if user did not respond in time
+
+
+<!-- To do 
+rename to psy-test 
+add TMT WCST 
+
+-->
