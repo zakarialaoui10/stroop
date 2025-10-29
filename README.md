@@ -1,4 +1,6 @@
-# stroop
+# stroop 
+
+<!-- psykit --> 
 
 **The Stroop Effect** is a psychological phenomenon where it takes longer to name the color of the ink of a word when the word itself denotes a different color. This test measures cognitive interference and reaction time.
 
